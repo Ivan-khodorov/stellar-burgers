@@ -1,10 +1,4 @@
 import { FC } from 'react';
 import { AppHeaderUI } from '@ui';
-import { useSelector } from '../../services/store';
-import { selectUser } from '../../services/users/users-slice';
 
-export const AppHeader: FC = () => {
-  const userName = useSelector(selectUser)?.name;
-
-  return <AppHeaderUI userName={userName ? userName : ''} />;
-};
+export const AppHeader: FC = () => <AppHeaderUI userName='' />;
