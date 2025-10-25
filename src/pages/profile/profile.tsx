@@ -7,8 +7,6 @@ import { selectUser } from '../../services/users/users-slice';
 
 export const Profile: FC = () => {
   const dispatch = useDispatch();
-
-  const [formValue, setFormValue] = useState({
   const user = useSelector(selectUser);
   if (!user) return null;
   const [formValue, setFormValue] = useState<Partial<TRegisterData>>({
