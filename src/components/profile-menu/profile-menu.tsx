@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { ProfileMenuUI } from '@ui';
 import { useDispatch } from '../../services/store';
 import { logoutUserThunk } from '../../services/users';
@@ -7,10 +7,13 @@ import { logoutUserThunk } from '../../services/users';
 export const ProfileMenu: FC = () => {
   const { pathname } = useLocation();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  const handleLogout = () => {
-    <Navigate replace to={'/login'} />;
-    dispatch(logoutUserThunk());
+  const handleLogout = async () => {
+    const action = await dispatch(logoutUserThunk());
+    if (logoutUserThunk.fulfilled.match(action)) {
+      navigate('/login', { replace: true });
+    }
   };
 
   return <ProfileMenuUI handleLogout={handleLogout} pathname={pathname} />;

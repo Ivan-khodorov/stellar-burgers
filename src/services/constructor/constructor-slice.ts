@@ -7,7 +7,7 @@ export interface ConstructorState {
     ingredients: TConstructorIngredient[];
   };
   isLoading: boolean;
-  error: string | undefined;
+  error: string | null;
 }
 
 export const initialState: ConstructorState = {
@@ -15,9 +15,8 @@ export const initialState: ConstructorState = {
     bun: null,
     ingredients: []
   },
-
   isLoading: false,
-  error: undefined
+  error: null
 };
 
 export const constructorSlice = createSlice({
@@ -26,32 +25,49 @@ export const constructorSlice = createSlice({
   reducers: {
     addIngredient: {
       reducer: (state, action: PayloadAction<TConstructorIngredient>) => {
-        if (action.payload.type === 'bun') {
-          state.burger.bun = action.payload;
-        } else {
-          state.burger.ingredients.push(action.payload);
+        const ing = action.payload;
+        if (ing.type === 'bun') {
+          state.burger.bun = ing;
+          return;
         }
+        state.burger.ingredients.push(ing);
       },
       prepare: (ingredient: TIngredient) => {
-        const id = nanoid();
-        return { payload: { ...ingredient, id } };
+        const id = nanoid(); // уникальный id экземпляра в конструкторе
+        const payload: TConstructorIngredient = { ...ingredient, id };
+        return { payload };
       }
     },
 
-    swapIngredient: (state, action) => {
-      const tmp = state.burger.ingredients[action.payload.first];
-      state.burger.ingredients[action.payload.first] =
-        state.burger.ingredients[action.payload.second];
-      state.burger.ingredients[action.payload.second] = tmp;
+    swapIngredient: (
+      state,
+      action: PayloadAction<{ first: number; second: number }>
+    ) => {
+      const { first, second } = action.payload;
+      const arr = state.burger.ingredients;
+
+      if (
+        first === second ||
+        first < 0 ||
+        second < 0 ||
+        first >= arr.length ||
+        second >= arr.length
+      ) {
+        return;
+      }
+
+      [arr[first], arr[second]] = [arr[second], arr[first]];
     },
 
-    removeIngredient: (state, action) => {
-      state.burger.ingredients = state.burger.ingredients.filter(
-        (ing) => ing._id !== action.payload
-      );
+    removeIngredient: (state, action: PayloadAction<string>) => {
+      const id = action.payload;
+      const idx = state.burger.ingredients.findIndex((ing) => ing.id === id);
+      if (idx !== -1) {
+        state.burger.ingredients.splice(idx, 1);
+      }
     },
 
-    clearBurger(state) {
+    clearBurger: (state) => {
       state.burger.bun = null;
       state.burger.ingredients = [];
     }

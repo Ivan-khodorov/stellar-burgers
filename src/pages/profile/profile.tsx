@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from '../../services/store';
 import { ProfileUI } from '@ui-pages';
-import { FC, SyntheticEvent, useEffect, useState } from 'react';
+import { FC, FormEvent, ChangeEvent, useEffect, useState } from 'react';
 import { TRegisterData } from '@api';
 import { updateUserThunk } from '../../services/users';
 import { selectUser } from '../../services/users/users-slice';
@@ -9,6 +9,7 @@ export const Profile: FC = () => {
   const dispatch = useDispatch();
   const user = useSelector(selectUser);
   if (!user) return null;
+
   const [formValue, setFormValue] = useState<Partial<TRegisterData>>({
     name: user.name,
     email: user.email,
@@ -16,8 +17,8 @@ export const Profile: FC = () => {
   });
 
   useEffect(() => {
-    setFormValue((prevState) => ({
-      ...prevState,
+    setFormValue((prev) => ({
+      ...prev,
       name: user?.name || '',
       email: user?.email || ''
     }));
@@ -28,13 +29,11 @@ export const Profile: FC = () => {
     formValue.email !== user?.email ||
     !!formValue.password;
 
-  const handleSubmit = (e: SyntheticEvent) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     dispatch(updateUserThunk(formValue));
   };
-
-  const handleCancel = (e: SyntheticEvent) => {
-    e.preventDefault();
+  const handleCancel = () => {
     setFormValue({
       name: user.name,
       email: user.email,
@@ -42,9 +41,9 @@ export const Profile: FC = () => {
     });
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormValue((prevState) => ({
-      ...prevState,
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setFormValue((prev) => ({
+      ...prev,
       [e.target.name]: e.target.value
     }));
   };

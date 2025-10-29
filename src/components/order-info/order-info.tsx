@@ -12,16 +12,15 @@ export const OrderInfo: FC = () => {
   const { number } = useParams<{ number: string }>();
   const orderNumber = Number(number);
 
-  /** TODO: взять переменные orderData и ingredients из стора */
   const orderData = useSelector(selectOrderByNumber);
-
+  const ingredients: TIngredient[] = useSelector(selectIngredients);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(getOrderNumberThunk(orderNumber));
-  }, []);
-
-  const ingredients: TIngredient[] = useSelector(selectIngredients);
+    if (Number.isFinite(orderNumber)) {
+      dispatch(getOrderNumberThunk(orderNumber));
+    }
+  }, [dispatch, orderNumber]);
 
   const orderInfo = useMemo(() => {
     if (!orderData || !ingredients.length) return null;
@@ -32,20 +31,16 @@ export const OrderInfo: FC = () => {
       [key: string]: TIngredient & { count: number };
     };
 
-    const ingredientsInfo = orderData.ingredients.reduce(
-      (acc: TIngredientsWithCount, item) => {
+    const ingredientsInfo = orderData.ingredients.reduce<TIngredientsWithCount>(
+      (acc, item) => {
         if (!acc[item]) {
           const ingredient = ingredients.find((ing) => ing._id === item);
           if (ingredient) {
-            acc[item] = {
-              ...ingredient,
-              count: 1
-            };
+            acc[item] = { ...ingredient, count: 1 };
           }
         } else {
-          acc[item].count++;
+          acc[item].count += 1;
         }
-
         return acc;
       },
       {}

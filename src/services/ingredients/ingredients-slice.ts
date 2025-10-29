@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { TIngredient } from '@utils-types';
 import { getIngredientsThunk } from './index';
 
@@ -24,14 +24,20 @@ export const ingredientsSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(getIngredientsThunk.fulfilled, (state, action) => {
-        state.loading = false;
-        state.ingredients = action.payload;
-      })
-      .addCase(getIngredientsThunk.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
-      });
+      .addCase(
+        getIngredientsThunk.fulfilled,
+        (state, action: PayloadAction<TIngredient[]>) => {
+          state.loading = false;
+          state.ingredients = action.payload;
+        }
+      )
+      .addCase(
+        getIngredientsThunk.rejected,
+        (state, action: PayloadAction<string | undefined>) => {
+          state.loading = false;
+          state.error = action.payload ?? 'Ошибка загрузки ингредиентов';
+        }
+      );
   },
   selectors: {
     selectIngredients: (state) => state.ingredients,

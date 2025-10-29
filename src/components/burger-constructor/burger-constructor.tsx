@@ -28,9 +28,7 @@ export const BurgerConstructor: FC = () => {
   const orderModalData = useSelector(selectNewOrder).order;
 
   const onOrderClick = () => {
-    if (!userBurger.bun || orderRequest) {
-      return;
-    }
+    if (!userBurger.bun || orderRequest) return;
 
     if (!user) {
       return navigate('/login', {
@@ -44,8 +42,6 @@ export const BurgerConstructor: FC = () => {
         }
       });
     }
-    const from = location.state?.from || { pathname: '/' };
-    const backgroundLocation = location.state?.from?.background || null;
 
     const itemsId = [
       userBurger.bun._id,
@@ -53,10 +49,8 @@ export const BurgerConstructor: FC = () => {
       userBurger.bun._id
     ];
 
-    dispatch(postUserBurgerThunk(itemsId)).then(() => dispatch(clearBurger()));
-    return navigate(from, {
-      replace: true,
-      state: { background: backgroundLocation }
+    dispatch(postUserBurgerThunk(itemsId)).then(() => {
+      dispatch(clearBurger());
     });
   };
 

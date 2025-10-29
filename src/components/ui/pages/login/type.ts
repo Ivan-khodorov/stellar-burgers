@@ -1,7 +1,10 @@
-import { Dispatch, SetStateAction } from 'react';
-import { PageUIProps } from '../common-type';
+import { FormEvent } from 'react';
 
-export type LoginUIProps = PageUIProps & {
+export type LoginUIProps = {
+  email: string;
+  setEmail: (v: string) => void;
   password: string;
-  setPassword: Dispatch<SetStateAction<string>>;
+  setPassword: (v: string) => void;
+  errorText?: string;
+  handleSubmit: (e: FormEvent<HTMLFormElement>) => void;
 };

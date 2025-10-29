@@ -13,6 +13,7 @@ import '../../index.css';
 import styles from './app.module.css';
 
 import { AppHeader, IngredientDetails, Modal, OrderInfo } from '@components';
+import { OrderInfoModal } from '../OrderInfoModal/OrderInfoModal';
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { PrivateRoute, PublicRoute } from '../check_road/check_road';
 import { useCallback, useEffect } from 'react';
@@ -115,9 +116,9 @@ const App = () => {
           <Route
             path='/feed/:number'
             element={
-              <Modal title={''} onClose={onCloseModal}>
+              <OrderInfoModal onClose={onCloseModal}>
                 <OrderInfo />
-              </Modal>
+              </OrderInfoModal>
             }
           />
 
@@ -134,9 +135,9 @@ const App = () => {
             path='/profile/orders/:number'
             element={
               <PrivateRoute>
-                <Modal title={''} onClose={onCloseModal}>
+                <OrderInfoModal onClose={onCloseModal}>
                   <OrderInfo />
-                </Modal>
+                </OrderInfoModal>
               </PrivateRoute>
             }
           />

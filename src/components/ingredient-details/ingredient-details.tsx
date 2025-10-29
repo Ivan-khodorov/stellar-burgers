@@ -6,7 +6,7 @@ import { useParams } from 'react-router-dom';
 import { selectIngredients } from '../../services/ingredients/ingredients-slice';
 
 export const IngredientDetails: FC = () => {
-  const id = String(Object.values(useParams()));
+  const { id } = useParams<{ id: string }>();
 
   const ingredientData = useSelector(selectIngredients).find(
     (ingredient) => ingredient._id === id

@@ -7,26 +7,56 @@ import {
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { TOrder } from '@utils-types';
 
+type MaybeData<T> = T | { data: T };
+
+function unwrap<T>(x: MaybeData<T>): T {
+  return x && typeof x === 'object' && 'data' in x
+    ? (x as { data: T }).data
+    : (x as T);
+}
+
+function getMessage(e: unknown): string {
+  if (e instanceof Error) return e.message;
+  return String(e ?? 'Неизвестная ошибка');
+}
+
+const toNumber = (v: unknown, fallback = 0): number => {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : fallback;
+};
+
+const isTOrder = (v: unknown): v is TOrder =>
+  typeof v === 'object' && v !== null && 'number' in v;
+
 export const getFeedsThunk = createAsyncThunk<
   { success: boolean; total: number; totalToday: number; orders: TOrder[] },
   void,
   { rejectValue: string }
 >('feed/fetchInfo', async (_, { rejectWithValue }) => {
   try {
+    interface FeedPayload {
+      success?: boolean;
+      total?: unknown;
+      totalToday?: unknown;
+      orders?: unknown;
+    }
+
     const resp = await getFeedsApi();
-    const data = (resp as any)?.data ?? resp;
+    const data = unwrap<FeedPayload>(resp as MaybeData<FeedPayload>);
+
+    const orders: TOrder[] = Array.isArray(data.orders)
+      ? data.orders.filter(isTOrder)
+      : [];
 
     return {
       success:
-        typeof data?.success === 'boolean'
-          ? data.success
-          : Boolean(data?.orders),
-      total: Number(data?.total ?? 0),
-      totalToday: Number(data?.totalToday ?? 0),
-      orders: Array.isArray(data?.orders) ? (data.orders as TOrder[]) : []
+        typeof data.success === 'boolean' ? data.success : orders.length > 0,
+      total: toNumber(data.total),
+      totalToday: toNumber(data.totalToday),
+      orders
     };
-  } catch (err: any) {
-    return rejectWithValue(err?.message || 'Ошибка загрузки ленты заказов');
+  } catch (e) {
+    return rejectWithValue(getMessage(e) || 'Ошибка загрузки ленты заказов');
   }
 });
 
@@ -36,16 +66,25 @@ export const getOrderNumberThunk = createAsyncThunk<
   { rejectValue: string }
 >('feed/fetchByNumber', async (orderNumber, { rejectWithValue }) => {
   try {
+    interface OrderPayload {
+      orders?: unknown;
+      order?: unknown;
+    }
+
     const resp = await getOrderByNumberApi(orderNumber);
-    const data = (resp as any)?.data ?? resp;
-    const orders: TOrder[] = Array.isArray(data?.orders)
-      ? (data.orders as TOrder[])
-      : data?.order
-        ? [data.order as TOrder]
+    const data = unwrap<OrderPayload>(resp as MaybeData<OrderPayload>);
+
+    const ordersArray: TOrder[] = Array.isArray(data.orders)
+      ? data.orders.filter(isTOrder)
+      : data.order && isTOrder(data.order)
+        ? [data.order]
         : [];
-    return { orders };
-  } catch (err: any) {
-    return rejectWithValue(err?.message || 'Ошибка получения заказа по номеру');
+
+    return { orders: ordersArray };
+  } catch (e) {
+    return rejectWithValue(
+      getMessage(e) || 'Ошибка получения заказа по номеру'
+    );
   }
 });
 
@@ -57,25 +96,33 @@ export const postUserBurgerThunk = createAsyncThunk<
   'order/postUserBurger',
   async (userBurgerIngredients, { rejectWithValue }) => {
     try {
-      const resp = await orderBurgerApi(userBurgerIngredients);
-      const data = (resp as any)?.data ?? resp;
-
-      const order: TOrder | undefined =
-        (data?.order as TOrder | undefined) ??
-        (Array.isArray(data?.orders) ? (data.orders[0] as TOrder) : undefined);
-
-      const name: string =
-        (data?.name as string | undefined) ??
-        (order && (order as any).name) ??
-        '';
-
-      if (!order || typeof (order as any).number !== 'number') {
-        return rejectWithValue('Некорректный ответ сервера: нет номера заказа');
+      interface PostOrderPayload {
+        order?: unknown;
+        orders?: unknown;
+        name?: unknown;
       }
 
+      const resp = await orderBurgerApi(userBurgerIngredients);
+      const data = unwrap<PostOrderPayload>(
+        resp as MaybeData<PostOrderPayload>
+      );
+
+      const order: TOrder | undefined =
+        (Array.isArray(data.orders) && data.orders.find(isTOrder)) ||
+        (isTOrder(data.order) ? data.order : undefined);
+
+      if (!order) {
+        return rejectWithValue('Некорректный ответ сервера: нет данных заказа');
+      }
+
+      const name =
+        typeof data.name === 'string' && data.name.trim().length > 0
+          ? data.name
+          : order.name;
+
       return { order, name };
-    } catch (err: any) {
-      return rejectWithValue(err?.message || 'Ошибка отправки заказа');
+    } catch (e) {
+      return rejectWithValue(getMessage(e) || 'Ошибка отправки заказа');
     }
   }
 );
@@ -87,10 +134,10 @@ export const getUserOrdersThunk = createAsyncThunk<
 >('order/getUserOrders', async (_, { rejectWithValue }) => {
   try {
     const orders = await getOrdersApi();
-    return orders;
-  } catch (err: any) {
+    return Array.isArray(orders) ? orders.filter(isTOrder) : [];
+  } catch (e) {
     return rejectWithValue(
-      err?.message || 'Ошибка получения заказов пользователя'
+      getMessage(e) || 'Ошибка получения заказов пользователя'
     );
   }
 });

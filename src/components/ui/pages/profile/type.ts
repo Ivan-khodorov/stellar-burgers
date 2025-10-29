@@ -1,14 +1,10 @@
-import { ChangeEvent, SyntheticEvent } from 'react';
+import { ChangeEvent, FormEvent, MouseEvent } from 'react';
 
 export type ProfileUIProps = {
-  formValue: {
-    name: string;
-    email: string;
-    password: string;
-  };
+  formValue: { name: string; email: string; password: string };
   isFormChanged: boolean;
-  handleSubmit: (e: SyntheticEvent) => void;
-  handleCancel: (e: SyntheticEvent) => void;
-  handleInputChange: (e: ChangeEvent<HTMLInputElement>) => void;
   updateUserError?: string;
+  handleSubmit: (e: FormEvent<HTMLFormElement>) => void;
+  handleCancel: () => void;
+  handleInputChange: (e: ChangeEvent<HTMLInputElement>) => void;
 };

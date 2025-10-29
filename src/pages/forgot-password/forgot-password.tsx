@@ -1,4 +1,4 @@
-import { FC, useState, SyntheticEvent } from 'react';
+import { FC, useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { forgotPasswordApi } from '@api';
@@ -10,7 +10,7 @@ export const ForgotPassword: FC = () => {
 
   const navigate = useNavigate();
 
-  const handleSubmit = (e: SyntheticEvent) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     setError(null);

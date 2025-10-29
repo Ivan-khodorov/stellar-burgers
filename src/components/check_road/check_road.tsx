@@ -1,5 +1,5 @@
-import { Navigate, useLocation } from 'react-router-dom';
 import React from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useSelector } from '../../services/store';
 import {
   selectIsAuthChecked,
@@ -16,35 +16,24 @@ export const PrivateRoute = ({
   const user = useSelector(selectUser);
   const location = useLocation();
 
-  console.log('isAuthChecked', isAuthChecked);
+  if (!isAuthChecked) return <Preloader />;
 
   if (user) return children;
-  return (
-    <Navigate
-      to='/login'
-      state={{
-        from: {
-          ...location,
-          background: location.state?.background,
-          state: null
-        }
-      }}
-      replace
-    />
-  );
+
+  return <Navigate to='/login' state={{ from: location }} replace />;
 };
 
 export const PublicRoute = ({ children }: { children: React.ReactElement }) => {
   const isAuthChecked = useSelector(selectIsAuthChecked);
   const user = useSelector(selectUser);
   const location = useLocation();
-  const backgroundLocation = location.state?.from?.background || null;
-  const from = location.state?.from || { pathname: '/' };
 
   if (!isAuthChecked) return <Preloader />;
-  if (!user) return children;
 
-  return (
-    <Navigate replace to={from} state={{ background: backgroundLocation }} />
-  );
+  if (user) {
+    const target = (location.state as any)?.from?.pathname ?? '/';
+    return <Navigate to={target} replace />;
+  }
+
+  return children;
 };
