@@ -35,7 +35,6 @@ export const BurgerIngredientUI: FC<TBurgerIngredientUIProps> = memo(
           <AddButton
             text='Добавить'
             onClick={() => {
-              console.log('CLICKED ADD', ingredient.name);
               handleAdd?.();
             }}
             extraClass={`${styles.addButton} mt-8`}

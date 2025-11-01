@@ -7,9 +7,16 @@ import { ModalOverlayUI } from '@ui';
 export const ModalUI: FC<TModalUIProps> = memo(
   ({ title, onClose, children }) => (
     <>
-      <div className={styles.modal} data-cy='modal'>
+      <div
+        className={styles.modal}
+        data-cy='modal'
+        role='dialog'
+        aria-modal='true'
+        aria-labelledby={title ? 'modal-title' : undefined}
+      >
         <div className={styles.header}>
           <h3
+            id='modal-title'
             className={`${styles.title} text text_type_main-large`}
             data-cy='modal-title'
           >

@@ -1,5 +1,5 @@
 /// <reference types="cypress" />
-import { expect as chaiExpect } from 'chai';
+import { SEL } from '../support/selectors';
 
 describe('Создание заказа', () => {
   beforeEach(() => {
@@ -15,7 +15,6 @@ describe('Создание заказа', () => {
     cy.intercept('GET', '**/auth/user*', { fixture: 'user.json' }).as(
       'getUser'
     );
-
     cy.intercept('POST', '**/orders*', { fixture: 'order.json' }).as(
       'createOrder'
     );
@@ -28,26 +27,13 @@ describe('Создание заказа', () => {
   });
 
   it('собирает бургер и оформляет заказ, проверяет номер и очистку конструктора', () => {
-    cy.get(
-      '[data-cy="ingredient-card"][data-id="643d69a5c3f7b9001cfa093c"]'
-    ).within(() => {
-      cy.get('[data-cy="add-ingredient"]')
-        .find('button')
-        .click({ force: true });
-    });
+    cy.addIngredientById('643d69a5c3f7b9001cfa093c'); // булка
+    cy.addIngredientById('643d69a5c3f7b9001cfa0941'); // начинка
 
-    cy.get(
-      '[data-cy="ingredient-card"][data-id="643d69a5c3f7b9001cfa0941"]'
-    ).within(() => {
-      cy.get('[data-cy="add-ingredient"]')
-        .find('button')
-        .click({ force: true });
-    });
-
-    cy.get('[data-cy="total-price"]')
+    cy.get(SEL.totalPrice)
       .invoke('text')
       .then((t) => {
-        chaiExpect(Number(t.trim())).to.be.greaterThan(0);
+        expect(Number(t.trim())).to.be.greaterThan(0);
       });
 
     cy.contains('Оформить заказ').click();
@@ -56,21 +42,21 @@ describe('Создание заказа', () => {
       .its('response.statusCode')
       .should('eq', 200);
 
-    cy.get('[data-cy="modal"]').should('be.visible');
+    cy.get(SEL.modal).should('be.visible');
 
     cy.fixture('order.json').then((o) => {
       const num =
         o?.order?.number ??
         (Array.isArray(o?.orders) ? o.orders[0]?.number : undefined);
-      chaiExpect(num).to.be.a('number');
+      expect(num).to.be.a('number');
       cy.contains(String(num)).should('be.visible');
     });
 
-    cy.get('[data-cy="modal-close"]').click();
-    cy.get('[data-cy="modal"]').should('not.exist');
+    cy.get(SEL.modalClose).click();
+    cy.get(SEL.modal).should('not.exist');
     cy.contains('Выберите булки').should('exist');
     cy.contains('Выберите начинку').should('exist');
-    cy.get('[data-cy="total-price"]').should('have.text', '0');
+    cy.get(SEL.totalPrice).should('have.text', '0');
   });
 
   afterEach(() => {
