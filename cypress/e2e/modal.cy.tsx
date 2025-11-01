@@ -1,4 +1,5 @@
 /// <reference types="cypress" />
+import { expect as chaiExpect } from 'chai';
 
 describe('Модальное окно ингредиента', () => {
   beforeEach(() => {
@@ -13,7 +14,7 @@ describe('Модальное окно ингредиента', () => {
   it('открывает модалку по клику и показывает данные именно выбранного ингредиента', () => {
     cy.fixture('ingredients.json').then(({ data }) => {
       const ing = data.find((x: any) => x._id === '643d69a5c3f7b9001cfa093c');
-      expect(ing, 'ингредиент из фикстуры найден').to.exist;
+      chaiExpect(ing, 'ингредиент из фикстуры найден').to.exist;
 
       cy.get(`[data-cy="ingredient-card"][data-id="${ing._id}"]`).click();
 
@@ -37,18 +38,14 @@ describe('Модальное окно ингредиента', () => {
   it('закрывается по клику на крестик', () => {
     cy.get('[data-cy="ingredient-card"]').first().click();
     cy.get('[data-cy="modal"]').should('be.visible');
-
     cy.get('[data-cy="modal-close"]').click();
-
     cy.get('[data-cy="modal"]').should('not.exist');
   });
 
   it('закрывается по клику на оверлей', () => {
     cy.get('[data-cy="ingredient-card"]').first().click();
     cy.get('[data-cy="modal"]').should('be.visible');
-
     cy.get('[data-cy="modal-overlay"]').click({ force: true });
-
     cy.get('[data-cy="modal"]').should('not.exist');
   });
 });

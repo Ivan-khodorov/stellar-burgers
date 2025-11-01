@@ -1,4 +1,5 @@
 /// <reference types="cypress" />
+import { expect as chaiExpect } from 'chai';
 
 describe('Создание заказа', () => {
   beforeEach(() => {
@@ -46,7 +47,7 @@ describe('Создание заказа', () => {
     cy.get('[data-cy="total-price"]')
       .invoke('text')
       .then((t) => {
-        expect(Number(t.trim())).to.be.greaterThan(0);
+        chaiExpect(Number(t.trim())).to.be.greaterThan(0);
       });
 
     cy.contains('Оформить заказ').click();
@@ -61,7 +62,7 @@ describe('Создание заказа', () => {
       const num =
         o?.order?.number ??
         (Array.isArray(o?.orders) ? o.orders[0]?.number : undefined);
-      expect(num).to.be.a('number');
+      chaiExpect(num).to.be.a('number');
       cy.contains(String(num)).should('be.visible');
     });
 

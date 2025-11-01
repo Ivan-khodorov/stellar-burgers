@@ -34,13 +34,7 @@
     "setupTests.ts",
     "cypress.config.ts",
     ".storybook/*.ts",
-    ".storybook/*.tsx",
-    "cypress/**/*.ts",
-    "cypress/**/*.tsx"
+    ".storybook/*.tsx"
   ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "build"
-  ]
+  "exclude": ["node_modules", "dist", "build", "cypress"]
 }
