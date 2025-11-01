@@ -1,23 +1,27 @@
-import { FC, useMemo } from 'react';
-import { Preloader } from '../ui/preloader';
-import { OrderInfoUI } from '../ui/order-info';
+import { FC, useEffect, useMemo } from 'react';
+import { Preloader } from '@ui';
+import { OrderInfoUI } from '@ui';
 import { TIngredient } from '@utils-types';
+import { useDispatch, useSelector } from '../../services/store';
+import { selectIngredients } from '../../services/ingredients/ingredients-slice';
+import { useParams } from 'react-router-dom';
+import { selectOrderByNumber } from '../../services/orders/orders-slice';
+import { getOrderNumberThunk } from '../../services/orders';
 
 export const OrderInfo: FC = () => {
-  /** TODO: взять переменные orderData и ingredients из стора */
-  const orderData = {
-    createdAt: '',
-    ingredients: [],
-    _id: '',
-    status: '',
-    name: '',
-    updatedAt: 'string',
-    number: 0
-  };
+  const { number } = useParams<{ number: string }>();
+  const orderNumber = Number(number);
 
-  const ingredients: TIngredient[] = [];
+  const orderData = useSelector(selectOrderByNumber);
+  const ingredients: TIngredient[] = useSelector(selectIngredients);
+  const dispatch = useDispatch();
 
-  /* Готовим данные для отображения */
+  useEffect(() => {
+    if (Number.isFinite(orderNumber)) {
+      dispatch(getOrderNumberThunk(orderNumber));
+    }
+  }, [dispatch, orderNumber]);
+
   const orderInfo = useMemo(() => {
     if (!orderData || !ingredients.length) return null;
 
@@ -27,20 +31,16 @@ export const OrderInfo: FC = () => {
       [key: string]: TIngredient & { count: number };
     };
 
-    const ingredientsInfo = orderData.ingredients.reduce(
-      (acc: TIngredientsWithCount, item) => {
+    const ingredientsInfo = orderData.ingredients.reduce<TIngredientsWithCount>(
+      (acc, item) => {
         if (!acc[item]) {
           const ingredient = ingredients.find((ing) => ing._id === item);
           if (ingredient) {
-            acc[item] = {
-              ...ingredient,
-              count: 1
-            };
+            acc[item] = { ...ingredient, count: 1 };
           }
         } else {
-          acc[item].count++;
+          acc[item].count += 1;
         }
-
         return acc;
       },
       {}
