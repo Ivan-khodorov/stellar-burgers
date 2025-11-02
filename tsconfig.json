@@ -28,5 +28,13 @@
       "@selectors": ["src/services/selectors"]
     }
   },
-  "include": ["src"]
+  "include": [
+    "src",
+    "jest.config.ts",
+    "setupTests.ts",
+    "cypress.config.ts",
+    ".storybook/*.ts",
+    ".storybook/*.tsx"
+  ],
+  "exclude": ["node_modules", "dist", "build", "cypress"]
 }
